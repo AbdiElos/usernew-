@@ -136,9 +136,9 @@ function validateResetToken(req, res, next) {
 
 function resetPasswordSchema(req, res, next) {
     const schema = Joi.object({
-        token: Joi.string().required(),
+       // token: Joi.string().required(),
         password: Joi.string().min(6).required(),
-        confirmPassword: Joi.string().valid(Joi.ref('password')).required()
+       // confirmPassword: Joi.string().valid(Joi.ref('password')).required()
     });
     validateRequest(req, next, schema);
 }
@@ -188,7 +188,7 @@ function create(req, res, next) {
 function updateSchema(req, res, next) {
     const schemaRules = {
         //title: Joi.string().empty(''),
-        Name: Joi.string().required(),
+        //Name: Joi.string().required(),
         firstName: Joi.string(),
         location: Joi.string().required(),
         profilePicture: Joi.string().required(),

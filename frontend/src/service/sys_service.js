@@ -21,7 +21,7 @@ export const signup = async (data) => {
     try {
         console.log(`am running`,data);
         
-         const response = await api.post(`/accounts/forgot-password`, {
+         const response = await api.post(`/accounts/register`, {
           
             username: data.username,
             email: data.email,
