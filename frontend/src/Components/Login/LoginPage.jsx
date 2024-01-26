@@ -59,7 +59,7 @@ const LoginPage = () => {
             {<img src={user_icon} alt="" />}
             <input type="email" placeholder="email" name="email" onChange={handleChange} value={data.email} />
           </div>
-          <div className="input">
+          <div className="login-input">
             {<img src={password_icon} alt="" />}
             <input type="password" placeholder="Password" name="password" onChange={handleChange} value={data.password} />
           </div>

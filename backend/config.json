@@ -4,7 +4,7 @@
         "port": 3306,
         "user": "root",
         "password": "",
-        "database": "userdata19"
+        "database": "userdata10"
     },
     "secret": "d9b4371d-0ae3-4169-8dd9-19133564d518",
     "emailFrom": "noneply@signup-verification-api.com",
@@ -12,8 +12,8 @@
         "host": "smtp.ethereal.email",
         "port": 587,
         "auth": {
-            "user": "roxane.kemmer2@ethereal.email",
-            "pass": "SE8NNvdvFdYN9epnhH"
+            "user": "tavares68@ethereal.email",
+            "pass": "CqzyyMJM4g6PR4EhA3"
             }
 
         }
