@@ -188,10 +188,10 @@ function create(req, res, next) {
 function updateSchema(req, res, next) {
     const schemaRules = {
         //title: Joi.string().empty(''),
-        Name: Joi.string(),
+        Name: Joi.string().required(),
         firstName: Joi.string(),
-        location: Joi.string(),
-        profilePicture: Joi.string(),
+        location: Joi.string().required(),
+        profilePicture: Joi.string().required(),
         
         lastName: Joi.string(),
         email: Joi.string().email(),

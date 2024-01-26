@@ -135,6 +135,7 @@ async function validateResetToken({ token }) {
 
     if (!account) throw 'Invalid token';
 
+    
     return account;
 }
 
