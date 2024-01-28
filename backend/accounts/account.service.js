@@ -8,6 +8,7 @@ const db = require('_helpers/db');
 const Role = require('_helpers/role');
 
 module.exports = {
+    generateRandomId,
     authenticate,
     refreshToken,
     revokeToken,
@@ -135,11 +136,10 @@ async function validateResetToken({ token }) {
 
     if (!account) throw 'Invalid token';
 
-    
     return account;
 }
 
-async function resetPassword({ password }) {
+async function resetPassword({ token, password }) {
     const account = await validateResetToken({ token });
 
     account.passwordHash = await hash(password);
@@ -249,8 +249,8 @@ function randomTokenString() {
 }*/
 
 function basicDetails(account) {
-    const { id, firstName, Name, lastName, email, role, created, updated, isVerified } = account;
-    return { id, firstName, Name, lastName, email, role, created, updated, isVerified };
+    const { id, firstName, username, Name, lastName, email, role, created, updated, isVerified } = account;
+    return { id, firstName, username, Name, lastName, email, role, created, updated, isVerified };
 }
 
 
@@ -295,7 +295,7 @@ async function sendAlreadyRegisteredEmail(email, origin) {
 async function sendPasswordResetEmail(account, origin) {
     let message;
     if (origin) {
-        const resetUrl = `${origin}/reset/${account.id}/${account.resetToken}`;
+        const resetUrl = `${origin}/account/reset-password?token=${account.resetToken}`;
         message = `<p>Please click the below link to reset your password, the link will be valid for 1 day:</p>
                    <p><a href="${resetUrl}">${resetUrl}</a></p>`;
     } else {
@@ -310,3 +310,13 @@ async function sendPasswordResetEmail(account, origin) {
                ${message}`
     });
 }
+
+function generateRandomId() {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let randomId = '';
+    for (let i = 0; i < 4; i++) {
+      const randomIndex = Math.floor(Math.random() * characters.length);
+      randomId += characters[randomIndex];
+    }
+    return randomId;
+  }

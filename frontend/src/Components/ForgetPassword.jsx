@@ -3,33 +3,32 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./ForgetPassword.css";
 import email_icon from "./Assets/email.png";
+import { Forget } from "../service/sys_service";
 
 
 function ForgetPassword () {
-  const navigate= useNavigate();
-  const [email, setEmail] = useState("");
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(false)
+
+  const navigate = useNavigate();
+  const [data, setData] = useState({ email: "", password: "" });
+  const [error1, setError] = useState("");
+
+
+  const handleChange = ({ currentTarget: input }) => {
+    setData({ ...data, [input.name]: input.value });
+  };
 
   const handleSubmit = async (e) => {
-      e.preventDefault();
-      try {
-          setIsLoading(true)
-          setMessage("");
-          setError("");
-          const res = await axios.post("/forgotPassword/forgotPassword", {email})
-          console.log(res);
-          setMessage(res.data.message);
-          console.log(res.data.message);
-      } catch (error) {
-          setError(error.response.data.message)
-          console.log(error);
-          console.log(error.response.data.message);
-      }finally{
-          setIsLoading(false)
+    e.preventDefault();
+    Forget(data.email).then((res) => {
+      if (res.success && res.data) {
+        console.log(res.data);
+        //  navigate("/verification")
+      } else {
+        console.log(res.error);
       }
-  }
+    });
+
+  };
   
 //d
   return (
@@ -58,31 +57,14 @@ function ForgetPassword () {
         <div className="forget-inputs">
           <form className="forget-input" onSubmit={handleSubmit}>
            <img src={email_icon} alt="" /> 
-           <input type="email"
-                    placeholder="Enter your email"
-                    onChange={(e) => setEmail(e.target.value)}
-                    value={email}
+           <input type="email" placeholder="email" name="email" onChange={handleChange} value={data.email} 
                     required
                 />
                          
           </form>
-          {
-                message && <div className='mt-10 bg-green-700 mx-auto w-2/5 p-3 rounded-lg shadow-lg text-white text-lg'>
-                    <p>
-                        {message}
-                    </p>
-                </div>
-            }
-            {
-                error && <div className='mt-10 bg-red-700 mx-auto w-2/5 p-3 rounded-lg shadow-lg text-white text-lg'>
-                    <p>
-                        {error}
-                    </p>
-                </div>
-            }
         </div>
         <div className="forget-submit-containerf">
-        <button className="forget-submitf"disabled={isLoading}>CONTINUE</button>
+        <button className="forget-submitf" onClick={handleSubmit}>CONTINUE</button>
         </div>
       </div>
     </div>

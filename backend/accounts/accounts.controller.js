@@ -16,7 +16,7 @@ router.post('/forgot-password', forgotPasswordSchema, forgotPassword);
 router.post('/validate-reset-token', validateResetTokenSchema, validateResetToken);
 router.post('/reset-password', resetPasswordSchema, resetPassword);
 router.get('/All-user', authorize(Role.Admin), getAll);
-router.get('/my-profile/:id', /*authorize()*/ getById);
+router.get('/my-profile/:id', authorize(), getById);
 router.post('/Add-user', authorize(Role.Admin), createSchema, create);
 router.put('/update-profile/:id', authorize(), updateSchema, update);
 router.delete('/delete-account/:id', authorize(), _delete);
@@ -138,7 +138,7 @@ function resetPasswordSchema(req, res, next) {
     const schema = Joi.object({
         token: Joi.string().required(),
         password: Joi.string().min(6).required(),
-       ///confirmPassword: Joi.string().valid(Joi.ref('password')).required()
+        confirmPassword: Joi.string().valid(Joi.ref('password')).required()
     });
     validateRequest(req, next, schema);
 }
@@ -168,7 +168,8 @@ function getById(req, res, next) {
 
 function createSchema(req, res, next) {
     const schema = Joi.object({
-        Username: Joi.string().required(),
+        username: Joi.string().required(),
+        Name: Joi.string().required(),
         //firstName: Joi.string().required(),
         //lastName: Joi.string().required(),
         email: Joi.string().email().required(),
@@ -188,12 +189,12 @@ function create(req, res, next) {
 function updateSchema(req, res, next) {
     const schemaRules = {
         //title: Joi.string().empty(''),
-        //Name: Joi.string().required(),
-        firstName: Joi.string(),
-        location: Joi.string().required(),
-        profilePicture: Joi.string().required(),
+        Name: Joi.string(),
+        //firstName: Joi.string(),
+        location: Joi.string(),
+        profilePicture: Joi.string(),
         
-        lastName: Joi.string(),
+        //lastName: Joi.string(),
         email: Joi.string().email(),
         password: Joi.string().min(6),
         confirmPassword: Joi.string().valid(Joi.ref('password')).empty('')
