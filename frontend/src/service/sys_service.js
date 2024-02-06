@@ -70,11 +70,19 @@ export const Forget = async (Email) => {
 //     }
 // };
 // reset password
-export const Reset_Page = async (Password) => {
+
+
+export const Reset_Page  = async (Password) => {
     try {
         console.log(`am running`);
-         const response = await api.post(`/accounts/reset-password`, {
-            password:Password
+        var url = window.location.href;
+        console.log(url)
+        url=new URL(url)
+        var query=url.search
+        console.log(query)
+        const response = await api.post(`/accounts/reset-password/${query}`, {
+            password:Password,
+            //confirmpassword:data.confirmpassword,
         });
         return { success: true, data: response.data };
     } catch (err) {
@@ -85,6 +93,23 @@ export const Reset_Page = async (Password) => {
         }
     }
 };
+
+/*export const Reset_Page = async (Password, ConfirmPassword) => {
+    try {
+        console.log(`am running`);
+         const response = await api.post(`/accounts/reset-password`, {
+            password:Password,
+            confirmPassword:ConfirmPassword
+        });
+        return { success: true, data: response.data };
+    } catch (err) {
+        if (err.response) {
+            return { success: false, data: null, error: err.message };
+        } else {
+            console.log(`Error: ${err.message}`);
+        }
+    }
+};*/
 
 export const setup_account = async (data) => {
     try {

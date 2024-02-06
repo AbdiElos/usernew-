@@ -4,11 +4,31 @@ import email_icon from "./Assets/email.png";
 import password_icon from "./Assets/password.png";
 import invisible from "./Assets/pass_invisible.png";
 import { useNavigate } from "react-router-dom";
+import { Reset_Page } from "../service/sys_service";
 const Reset = () => {
-  const [action, setAction] = useState("Create New Password");
+ 
   const navigate= useNavigate();
-  
-  
+  const [showPassword, setShowPassword] = useState(false);
+
+  const [data, setData] = useState({password: "" });
+  const [error1, setError] = useState("");
+
+  const handleChange = ({ currentTarget: input }) => {
+    setData({ ...data, [input.name]: input.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault(); 
+    Reset_Page(data.password).then((res) => {
+      if (res.success && res.data) {
+        console.log(res.data);
+         navigate("/login")
+      } else {
+        console.log(res.error);
+      }
+    });
+
+  };
 
   return (
     <div className="signup">
@@ -29,24 +49,25 @@ const Reset = () => {
       
       <form className="reset-page">
         <div className="reset-header">
-          <div className="reset-text">{action}</div>
+          <div className="reset-text">Create New Password</div>
         </div>
 
         <div className="reset-inputs">
           <div className="reset-input">
-          { <img src={email_icon} alt="" /> }
-            <input type="email"  placeholder="Email"/>
+          { <img src={password_icon} alt="" /> }
+          <input type={showPassword ? "text" : "password"}  placeholder="Password" name="password" onChange={handleChange} value={data.password} />
+            <img src={invisible} alt="" onClick={() => setShowPassword(!showPassword)} /> 
           </div>
 
           <div className="reset-input">
-          { <img src={password_icon} alt="" /> }
         
-            <input type="password" placeholder="Password" />
-            { <img src={invisible} alt="" /> }
+          <img src={password_icon} alt="" />
+            <input type={showPassword ? "text" : "password"} placeholder=" Confirm Password" />
+             
           </div>
         </div>
         <div className="reset-submit-container">
-          <button className="reset-submit" onClick={()=>navigate("/login")}>CONTINUE</button>
+          <button className="reset-submit" onClick={handleSubmit}>CONTINUE</button>
         </div>
 
       </form>

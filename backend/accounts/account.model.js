@@ -1,5 +1,4 @@
 //const { generateRandomId } = require('./account.service');
-
 const { DataTypes } = require('sequelize');
 
 module.exports = model;
@@ -7,7 +6,7 @@ module.exports = model;
 function model(sequelize) {
   const attributes = {
     id: {
-      type: DataTypes.STRING(4), // Set the length of the string to 4
+      type: DataTypes.STRING(4),
       primaryKey: true,
       allowNull: false,
       unique: true,
@@ -16,9 +15,10 @@ function model(sequelize) {
     email: { type: DataTypes.STRING, allowNull: false },
     passwordHash: { type: DataTypes.STRING, allowNull: false },
     username: { type: DataTypes.STRING, allowNull: false },
-    Name: { type: DataTypes.STRING, allowNull: true },
+    name: { type: DataTypes.STRING, allowNull: true },
+    dateofBirth: { type: DataTypes.DATEONLY, allowNull: true },
     gender: { type: DataTypes.STRING, allowNull: true },
-    phone: { type: DataTypes.STRING, allowNull: true },
+    phone: { type: DataTypes.STRING(15), allowNull: true },
     location: { type: DataTypes.STRING, allowNull: true },
     profilePicture: { type: DataTypes.STRING },
     firstName: { type: DataTypes.STRING, allowNull: true },
@@ -31,18 +31,20 @@ function model(sequelize) {
     passwordReset: { type: DataTypes.DATE },
     created: { type: DataTypes.DATE, allowNull: false, defaultValue: DataTypes.NOW },
     updated: { type: DataTypes.DATE },
+    deleted: { type: DataTypes.BOOLEAN, defaultValue: false },
     isVerified: {
       type: DataTypes.VIRTUAL,
       get() {
         return !!(this.verified || this.passwordReset);
       }
-    }
+    },
+    status: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true }, // Updated 'status' column to BOOLEAN type
   };
 
   const options = {
     timestamps: false,
     defaultScope: {
-      attributes: { exclude: ['passwordHash'] }
+      attributes: { exclude: ['passwordHash', 'deleted'] }
     },
     scopes: {
       withHash: { attributes: {} }

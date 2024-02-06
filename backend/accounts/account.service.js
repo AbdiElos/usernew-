@@ -6,6 +6,7 @@ const { Op } = require('sequelize');
 const sendEmail = require('_helpers/send-email');
 const db = require('_helpers/db');
 const Role = require('_helpers/role');
+const { query } = require('express');
 
 module.exports = {
     generateRandomId,
@@ -22,30 +23,46 @@ module.exports = {
     getById,
     create,
     update,
+    basicDetails,
+    userstatus,
     delete: _delete
 };
-
 async function authenticate({ email, password, ipAddress }) {
     const account = await db.Account.scope('withHash').findOne({ where: { email } });
-
-    if (!account || !account.isVerified || !(await bcrypt.compare(password, account.passwordHash))) {
-        throw 'Email or password is incorrect';
+  
+    // Check if the account exists
+    if (!account) {
+      throw 'Account not found';
     }
-
- 
+  
+    // Check if the account is verified
+    if (!account.isVerified) {
+      throw 'Your account is not verified';
+    }
+  
+    // Check if the account status is active
+    if (account.status !== true) {
+      throw 'Your account is inactive';
+    }
+  
+    // Check if the password is correct
+    const passwordMatch = await bcrypt.compare(password, account.passwordHash);
+    if (!passwordMatch) {
+      throw 'Email or password is incorrect';
+    }
+  
+    // Generate JWT token and refresh token
     const jwtToken = generateJwtToken(account);
     const refreshToken = generateRefreshToken(account, ipAddress);
-
+  
     await refreshToken.save();
-
-   
+  
     return {
-        ...basicDetails(account),
-        jwtToken,
-        refreshToken: refreshToken.token
+      ...basicDetails(account),
+      jwtToken,
+      refreshToken: refreshToken.token
     };
-}
-
+  }
 async function refreshToken({ token, ipAddress }) {
     const refreshToken = await getRefreshToken(token);
     const account = await refreshToken.getAccount();
@@ -139,15 +156,22 @@ async function validateResetToken({ token }) {
     return account;
 }
 
-async function resetPassword({ token, password }) {
-    const account = await validateResetToken({ token });
+async function resetPassword({ password , email }) {
+    
+    
+    const account = await db.Account.findOne({ where: { email:email } });
 
+    if (!account) {
+        throw 'Account not found';
+    }
+
+    // Update the password hash
     account.passwordHash = await hash(password);
     account.passwordReset = Date.now();
-    account.resetToken = null;
+
+    // Save the updated account
     await account.save();
 }
-
 async function getAll() {
     const accounts = await db.Account.findAll();
     return accounts.map(x => basicDetails(x));
@@ -157,6 +181,7 @@ async function getById(id) {
     const account = await getAccount(id);
     return basicDetails(account);
 }
+
 
 async function create(params) {
     
@@ -179,17 +204,17 @@ async function create(params) {
 async function update(id, params) {
     const account = await getAccount(id);
 
-    
+    // validate (if email was changed)
     if (params.email && account.email !== params.email && await db.Account.findOne({ where: { email: params.email } })) {
         throw 'Email "' + params.email + '" is already taken';
     }
 
-    
+    // hash password if it was entered
     if (params.password) {
         params.passwordHash = await hash(params.password);
     }
 
-    
+    // copy params to account and save
     Object.assign(account, params);
     account.updated = Date.now();
     await account.save();
@@ -197,10 +222,34 @@ async function update(id, params) {
     return basicDetails(account);
 }
 
+
+async function userstatus(id, params) {
+    const account = await getAccount(id);
+  
+    // Update the status of the user
+    if (params.hasOwnProperty('status')) {
+      account.status = params.status;
+      account.updated = new Date();
+      await account.save();
+    }
+  
+    return basicDetails(account);
+  }
+
+
+
+
 async function _delete(id) {
     const account = await getAccount(id);
     await account.destroy();
 }
+
+
+
+
+
+
+
 
 
 
@@ -249,8 +298,8 @@ function randomTokenString() {
 }*/
 
 function basicDetails(account) {
-    const { id, firstName, username, Name, lastName, email, role, created, updated, isVerified } = account;
-    return { id, firstName, username, Name, lastName, email, role, created, updated, isVerified };
+    const { id, status, location, gender, firstName, username, name, lastName, email, role, created, updated, isVerified } = account;
+    return { id, status, location,gender, firstName, username, name, lastName, email, role, created, updated, isVerified };
 }
 
 
@@ -295,7 +344,7 @@ async function sendAlreadyRegisteredEmail(email, origin) {
 async function sendPasswordResetEmail(account, origin) {
     let message;
     if (origin) {
-        const resetUrl = `${origin}/account/reset-password?token=${account.resetToken}`;
+        const resetUrl = `${origin}/reset?email =${account.email}&token=${account.resetToken}`;
         message = `<p>Please click the below link to reset your password, the link will be valid for 1 day:</p>
                    <p><a href="${resetUrl}">${resetUrl}</a></p>`;
     } else {
@@ -305,12 +354,11 @@ async function sendPasswordResetEmail(account, origin) {
 
     await sendEmail({
         to: account.email,
-        subject: 'Sign-up Verification - Reset Password',
+        subject: 'Sign-up Verification API - Reset Password',
         html: `<h4>Reset Password Email</h4>
                ${message}`
     });
 }
-
 function generateRandomId() {
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     let randomId = '';
